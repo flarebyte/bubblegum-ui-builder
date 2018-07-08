@@ -1,10 +1,10 @@
-module About
-  exposing(appFooter, appHeader, appSearch, appForm)
+module About exposing (appFooter, appForm, appHeader, appSearch)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-appSearch: Html msg
+
+appSearch : Html msg
 appSearch =
     nav [ class "panel" ]
         [ p [ class "panel-heading" ]
@@ -85,8 +85,7 @@ appSearch =
         ]
 
 
-
-appForm: Html msg
+appForm : Html msg
 appForm =
     div []
         [ div [ class "field" ]
@@ -191,8 +190,10 @@ appForm =
                 ]
             ]
         ]
-appHeader: Html msg
-appHeader = 
+
+
+appHeader : Html msg
+appHeader =
     div [ class "container" ]
         [ h1 [ class "title" ]
             [ text "Bublegum UI Builder" ]
@@ -200,6 +201,7 @@ appHeader =
             [ text "Create structure documents"
             ]
         ]
+
 
 appFooter : Html msg
 appFooter =

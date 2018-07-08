@@ -1,13 +1,16 @@
-module IdGenerator exposing(..)
+module IdGenerator exposing (..)
 
-import AnyModel exposing (WidgetType, getIdPrefix) 
-import Hashids exposing (hashidsSimple, encodeList)
+import AnyModel exposing (WidgetType, getIdPrefix)
+import Hashids exposing (encodeList, hashidsSimple)
+
 
 hashids : Hashids.Context
-hashids = hashidsSimple "4kThCaqnggqdRjw3d1s1"
+hashids =
+    hashidsSimple "4kThCaqnggqdRjw3d1s1"
 
-{-| create unique id for this document. -}
-create: WidgetType -> Int ->  String
+
+{-| create unique id for this document.
+-}
+create : WidgetType -> Int -> String
 create widgetType counter =
-   String.join "-" [getIdPrefix widgetType, encodeList hashids [counter]]
- 
+    String.join "-" [ getIdPrefix widgetType, encodeList hashids [ counter ] ]
