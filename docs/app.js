@@ -5730,6 +5730,126 @@ var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive
 var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
 
+//import Maybe, Native.List //
+
+var _elm_lang$core$Native_Regex = function() {
+
+function escape(str)
+{
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+function caseInsensitive(re)
+{
+	return new RegExp(re.source, 'gi');
+}
+function regex(raw)
+{
+	return new RegExp(raw, 'g');
+}
+
+function contains(re, string)
+{
+	return string.match(re) !== null;
+}
+
+function find(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex === re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		out.push({
+			match: result[0],
+			submatches: _elm_lang$core$Native_List.fromArray(subs),
+			index: result.index,
+			number: number
+		});
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+function replace(n, re, replacer, string)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		return replacer({
+			match: match,
+			submatches: _elm_lang$core$Native_List.fromArray(submatches),
+			index: arguments[arguments.length - 2],
+			number: count
+		});
+	}
+	return string.replace(re, jsReplacer);
+}
+
+function split(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	if (n === Infinity)
+	{
+		return _elm_lang$core$Native_List.fromArray(str.split(re));
+	}
+	var string = str;
+	var result;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		if (!(result = re.exec(string))) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+return {
+	regex: regex,
+	caseInsensitive: caseInsensitive,
+	escape: escape,
+
+	contains: F2(contains),
+	find: F3(find),
+	replace: F4(replace),
+	split: F3(split)
+};
+
+}();
+
 var _elm_lang$core$Tuple$mapSecond = F2(
 	function (func, _p0) {
 		var _p1 = _p0;
@@ -5756,6 +5876,154 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 	var _p7 = _p6;
 	return _p7._0;
 };
+
+var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
+var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
+var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
+var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
+var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
+var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
+var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
+var _elm_lang$core$Regex$Match = F4(
+	function (a, b, c, d) {
+		return {match: a, submatches: b, index: c, number: d};
+	});
+var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
+var _elm_lang$core$Regex$AtMost = function (a) {
+	return {ctor: 'AtMost', _0: a};
+};
+var _elm_lang$core$Regex$All = {ctor: 'All'};
+
+var _elm_lang$core$Set$foldr = F3(
+	function (f, b, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$foldr,
+			F3(
+				function (k, _p2, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p1._0);
+	});
+var _elm_lang$core$Set$foldl = F3(
+	function (f, b, _p3) {
+		var _p4 = _p3;
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, _p5, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p4._0);
+	});
+var _elm_lang$core$Set$toList = function (_p6) {
+	var _p7 = _p6;
+	return _elm_lang$core$Dict$keys(_p7._0);
+};
+var _elm_lang$core$Set$size = function (_p8) {
+	var _p9 = _p8;
+	return _elm_lang$core$Dict$size(_p9._0);
+};
+var _elm_lang$core$Set$member = F2(
+	function (k, _p10) {
+		var _p11 = _p10;
+		return A2(_elm_lang$core$Dict$member, k, _p11._0);
+	});
+var _elm_lang$core$Set$isEmpty = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$Dict$isEmpty(_p13._0);
+};
+var _elm_lang$core$Set$Set_elm_builtin = function (a) {
+	return {ctor: 'Set_elm_builtin', _0: a};
+};
+var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
+var _elm_lang$core$Set$singleton = function (k) {
+	return _elm_lang$core$Set$Set_elm_builtin(
+		A2(
+			_elm_lang$core$Dict$singleton,
+			k,
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Set$insert = F2(
+	function (k, _p14) {
+		var _p15 = _p14;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A3(
+				_elm_lang$core$Dict$insert,
+				k,
+				{ctor: '_Tuple0'},
+				_p15._0));
+	});
+var _elm_lang$core$Set$fromList = function (xs) {
+	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
+};
+var _elm_lang$core$Set$map = F2(
+	function (f, s) {
+		return _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				f,
+				_elm_lang$core$Set$toList(s)));
+	});
+var _elm_lang$core$Set$remove = F2(
+	function (k, _p16) {
+		var _p17 = _p16;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$remove, k, _p17._0));
+	});
+var _elm_lang$core$Set$union = F2(
+	function (_p19, _p18) {
+		var _p20 = _p19;
+		var _p21 = _p18;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
+	});
+var _elm_lang$core$Set$intersect = F2(
+	function (_p23, _p22) {
+		var _p24 = _p23;
+		var _p25 = _p22;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
+	});
+var _elm_lang$core$Set$diff = F2(
+	function (_p27, _p26) {
+		var _p28 = _p27;
+		var _p29 = _p26;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
+	});
+var _elm_lang$core$Set$filter = F2(
+	function (p, _p30) {
+		var _p31 = _p30;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(
+				_elm_lang$core$Dict$filter,
+				F2(
+					function (k, _p32) {
+						return p(k);
+					}),
+				_p31._0));
+	});
+var _elm_lang$core$Set$partition = F2(
+	function (p, _p33) {
+		var _p34 = _p33;
+		var _p35 = A2(
+			_elm_lang$core$Dict$partition,
+			F2(
+				function (k, _p36) {
+					return p(k);
+				}),
+			_p34._0);
+		var p1 = _p35._0;
+		var p2 = _p35._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
+			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
+		};
+	});
 
 var _elm_lang$virtual_dom$VirtualDom_Debug$wrap;
 var _elm_lang$virtual_dom$VirtualDom_Debug$wrapWithFlags;
@@ -8260,6 +8528,2783 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _flarebyte$bubblegum_ui_builder$About$appFooter = A2(
+	_elm_lang$html$Html$footer,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('footer'),
+		_1: {ctor: '[]'}
+	},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('container'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('content has-text-centered'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$p,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$strong,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Bublegum UI Builder'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(' by '),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$href('https://github.com/olih'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Olivier Huin'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('. The source code is licensed under BSD3'),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}),
+		_1: {ctor: '[]'}
+	});
+var _flarebyte$bubblegum_ui_builder$About$appHeader = A2(
+	_elm_lang$html$Html$div,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('container'),
+		_1: {ctor: '[]'}
+	},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$h1,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('title'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('Bublegum UI Builder'),
+				_1: {ctor: '[]'}
+			}),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$p,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('subtitle'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Create structure documents'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		}
+	});
+var _flarebyte$bubblegum_ui_builder$About$appForm = A2(
+	_elm_lang$html$Html$div,
+	{ctor: '[]'},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('field'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$label,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('label'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('Name'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('control'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$input,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('input'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$placeholder('Text input'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$type_('text'),
+											_1: {ctor: '[]'}
+										}
+									}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('field'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$label,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('label'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Username'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('control has-icons-left has-icons-right'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$input,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('input is-success'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$placeholder('Text input'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$type_('text'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$value('bulma'),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									},
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$span,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('icon is-small is-left'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$i,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('fas fa-user'),
+													_1: {ctor: '[]'}
+												},
+												{ctor: '[]'}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$span,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('icon is-small is-right'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$i,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('fas fa-check'),
+														_1: {ctor: '[]'}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$p,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('help is-success'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('This username is available'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('field'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$label,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('label'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Email'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('control has-icons-left has-icons-right'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$input,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('input is-danger'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$placeholder('Email input'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$type_('email'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$value('hello@'),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										},
+										{ctor: '[]'}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$span,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('icon is-small is-left'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$i,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('fas fa-envelope'),
+														_1: {ctor: '[]'}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$span,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('icon is-small is-right'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$i,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('fas fa-exclamation-triangle'),
+															_1: {ctor: '[]'}
+														},
+														{ctor: '[]'}),
+													_1: {ctor: '[]'}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$p,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('help is-danger'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('This email is invalid'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('field'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$label,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('label'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Subject'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('control'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('select'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$select,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$option,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('Select dropdown'),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$option,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text('With options'),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}
+													}),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('field'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$label,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('label'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Message'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('control'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$textarea,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('textarea'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$placeholder('Textarea'),
+														_1: {ctor: '[]'}
+													}
+												},
+												{ctor: '[]'}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('field'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('control'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$label,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('checkbox'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$input,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$type_('checkbox'),
+															_1: {ctor: '[]'}
+														},
+														{ctor: '[]'}),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('I agree to the '),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$a,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$href('#'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text('terms and conditions'),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('field'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('control'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$label,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('radio'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$input,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$name('question'),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$type_('radio'),
+																	_1: {ctor: '[]'}
+																}
+															},
+															{ctor: '[]'}),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Yes    '),
+															_1: {ctor: '[]'}
+														}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$label,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('radio'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$input,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$name('question'),
+																	_1: {
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$type_('radio'),
+																		_1: {ctor: '[]'}
+																	}
+																},
+																{ctor: '[]'}),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('No    '),
+																_1: {ctor: '[]'}
+															}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('field is-grouped'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('control'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$button,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('button is-link'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Submit'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('control'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$button,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('button is-text'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('Cancel'),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+var _flarebyte$bubblegum_ui_builder$About$appSearch = A2(
+	_elm_lang$html$Html$nav,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('panel'),
+		_1: {ctor: '[]'}
+	},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$p,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('repositories  '),
+				_1: {ctor: '[]'}
+			}),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('control has-icons-left'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$input,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('input is-small'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$placeholder('search'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$type_('text'),
+											_1: {ctor: '[]'}
+										}
+									}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$span,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('icon is-small is-left'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$i,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('fas fa-search'),
+												_1: {ctor: '[]'}
+											},
+											{ctor: '[]'}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$p,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('panel-tabs'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$a,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('is-active'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('all'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('public'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('private'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('sources'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('forks'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('panel-block is-active'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$i,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('fas fa-book'),
+											_1: {ctor: '[]'}
+										},
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('bulma  '),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$a,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$span,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$i,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('fas fa-book'),
+												_1: {ctor: '[]'}
+											},
+											{ctor: '[]'}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('marksheet  '),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$span,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$i,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('fas fa-book'),
+													_1: {ctor: '[]'}
+												},
+												{ctor: '[]'}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('minireset.css  '),
+										_1: {ctor: '[]'}
+									}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$span,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$i,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('fas fa-book'),
+														_1: {ctor: '[]'}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('jgthms.github.io  '),
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$span,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$i,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('fas fa-code-branch'),
+															_1: {ctor: '[]'}
+														},
+														{ctor: '[]'}),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('daniellowtw/infboard  '),
+												_1: {ctor: '[]'}
+											}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$span,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('panel-icon'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$i,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('fas fa-code-branch'),
+																_1: {ctor: '[]'}
+															},
+															{ctor: '[]'}),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('mojs  '),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$label,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$input,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$type_('checkbox'),
+															_1: {ctor: '[]'}
+														},
+														{ctor: '[]'}),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('remember me  '),
+														_1: {ctor: '[]'}
+													}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('panel-block'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$button,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('button is-link is-outlined is-fullwidth'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('reset all filters    '),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+
+var _flarebyte$bubblegum_ui_builder$AnyModel$getIdPrefix = function (widgetType) {
+	var _p0 = widgetType;
+	switch (_p0.ctor) {
+		case 'CheckboxWidget':
+			return 'checkbox-widget';
+		case 'IncSpinnerWidget':
+			return 'inc-spinner-widget';
+		case 'MediumTextWidget':
+			return 'medium-text-widget';
+		case 'BoundedListBoxWidget':
+			return 'bounded-list-box-widget';
+		case 'BoundedMultipleSelectWidget':
+			return 'bounded-multiple-select-widget';
+		case 'UnboundedListBoxWidget':
+			return 'unbounded-list-box-widget';
+		case 'RangeSliderWidget':
+			return 'range-slider-widget';
+		case 'DateViewerWidget':
+			return 'date-viewer-widget';
+		case 'LongTextWidget':
+			return 'long-text-widget';
+		case 'TextAreaWidget':
+			return 'text-area-widget';
+		case 'BoundedRadioWidget':
+			return 'bounded-radio-widget';
+		case 'RowPanelWidget':
+			return 'row-panel-widget';
+		case 'BlockWidget':
+			return 'block-widget';
+		default:
+			return 'document-widget';
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$documentFieldSupport = {ctor: '[]'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$FieldInfo = F4(
+	function (a, b, c, d) {
+		return {label: a, hint: b, infoType: c, suggestions: d};
+	});
+var _flarebyte$bubblegum_ui_builder$AnyModel$AnyModel = F3(
+	function (a, b, c) {
+		return {id: a, widgetType: b, fields: c};
+	});
+var _flarebyte$bubblegum_ui_builder$AnyModel$DocumentWidget = {ctor: 'DocumentWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$BlockWidget = {ctor: 'BlockWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$RowPanelWidget = {ctor: 'RowPanelWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$BoundedRadioWidget = {ctor: 'BoundedRadioWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$TextAreaWidget = {ctor: 'TextAreaWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$LongTextWidget = {ctor: 'LongTextWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$DateViewerWidget = {ctor: 'DateViewerWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$RangeSliderWidget = {ctor: 'RangeSliderWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$UnboundedListBoxWidget = {ctor: 'UnboundedListBoxWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$BoundedMultipleSelectWidget = {ctor: 'BoundedMultipleSelectWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$BoundedListBoxWidget = {ctor: 'BoundedListBoxWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MediumTextWidget = {ctor: 'MediumTextWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$IncSpinnerWidget = {ctor: 'IncSpinnerWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$CheckboxWidget = {ctor: 'CheckboxWidget'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Validator = function (a) {
+	return {ctor: 'Validator', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Traits = function (a) {
+	return {ctor: 'Traits', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Styles = function (a) {
+	return {ctor: 'Styles', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$RegularExpr = function (a) {
+	return {ctor: 'RegularExpr', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Position = function (a) {
+	return {ctor: 'Position', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Placeholder = function (a) {
+	return {ctor: 'Placeholder', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MinLines = function (a) {
+	return {ctor: 'MinLines', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MinItems = function (a) {
+	return {ctor: 'MinItems', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxLines = function (a) {
+	return {ctor: 'MaxLines', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxLength = function (a) {
+	return {ctor: 'MaxLength', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxItems = function (a) {
+	return {ctor: 'MaxItems', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$LanguageSyntax = function (a) {
+	return {ctor: 'LanguageSyntax', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Label = function (a) {
+	return {ctor: 'Label', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Icons = function (a) {
+	return {ctor: 'Icons', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$Hint = function (a) {
+	return {ctor: 'Hint', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$HelpValid = function (a) {
+	return {ctor: 'HelpValid', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$HelpInvalid = function (a) {
+	return {ctor: 'HelpInvalid', _0: a};
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$createField = function (fieldType) {
+	var _p1 = fieldType;
+	switch (_p1.ctor) {
+		case 'HelpInvalidType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$HelpInvalid('');
+		case 'HelpValidType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$HelpValid('');
+		case 'HintType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Hint('');
+		case 'IconsType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Icons(_elm_lang$core$Set$empty);
+		case 'LabelType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Label('');
+		case 'LanguageSyntaxType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$LanguageSyntax('');
+		case 'MaxItemsType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$MaxItems(1000);
+		case 'MaxLengthType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$MaxLength(1000);
+		case 'MaxLinesType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$MaxLines(1000);
+		case 'MinItemsType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$MinItems(0);
+		case 'MinLinesType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$MinLines(0);
+		case 'RegularExprType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$RegularExpr('');
+		case 'PositionType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Position(0);
+		case 'PlaceholderType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Placeholder('');
+		case 'StylesType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Styles(_elm_lang$core$Set$empty);
+		case 'TraitsType':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Traits(_elm_lang$core$Set$empty);
+		default:
+			return _flarebyte$bubblegum_ui_builder$AnyModel$Validator('');
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$ValidatorType = {ctor: 'ValidatorType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$TraitsType = {ctor: 'TraitsType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$StylesType = {ctor: 'StylesType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$RegularExprType = {ctor: 'RegularExprType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$PositionType = {ctor: 'PositionType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$PlaceholderType = {ctor: 'PlaceholderType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MinLinesType = {ctor: 'MinLinesType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MinItemsType = {ctor: 'MinItemsType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxLinesType = {ctor: 'MaxLinesType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxLengthType = {ctor: 'MaxLengthType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MaxItemsType = {ctor: 'MaxItemsType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$LanguageSyntaxType = {ctor: 'LanguageSyntaxType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$LabelType = {ctor: 'LabelType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$IconsType = {ctor: 'IconsType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$other = {
+	ctor: '::',
+	_0: _flarebyte$bubblegum_ui_builder$AnyModel$IconsType,
+	_1: {
+		ctor: '::',
+		_0: _flarebyte$bubblegum_ui_builder$AnyModel$LanguageSyntaxType,
+		_1: {
+			ctor: '::',
+			_0: _flarebyte$bubblegum_ui_builder$AnyModel$MaxLengthType,
+			_1: {
+				ctor: '::',
+				_0: _flarebyte$bubblegum_ui_builder$AnyModel$MaxLinesType,
+				_1: {
+					ctor: '::',
+					_0: _flarebyte$bubblegum_ui_builder$AnyModel$MinLinesType,
+					_1: {
+						ctor: '::',
+						_0: _flarebyte$bubblegum_ui_builder$AnyModel$PlaceholderType,
+						_1: {
+							ctor: '::',
+							_0: _flarebyte$bubblegum_ui_builder$AnyModel$RegularExprType,
+							_1: {
+								ctor: '::',
+								_0: _flarebyte$bubblegum_ui_builder$AnyModel$ValidatorType,
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$HintType = {ctor: 'HintType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$HelpValidType = {ctor: 'HelpValidType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$HelpInvalidType = {ctor: 'HelpInvalidType'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport = {
+	ctor: '::',
+	_0: _flarebyte$bubblegum_ui_builder$AnyModel$LabelType,
+	_1: {
+		ctor: '::',
+		_0: _flarebyte$bubblegum_ui_builder$AnyModel$HintType,
+		_1: {
+			ctor: '::',
+			_0: _flarebyte$bubblegum_ui_builder$AnyModel$HelpInvalidType,
+			_1: {
+				ctor: '::',
+				_0: _flarebyte$bubblegum_ui_builder$AnyModel$HelpValidType,
+				_1: {
+					ctor: '::',
+					_0: _flarebyte$bubblegum_ui_builder$AnyModel$MinItemsType,
+					_1: {
+						ctor: '::',
+						_0: _flarebyte$bubblegum_ui_builder$AnyModel$MaxItemsType,
+						_1: {
+							ctor: '::',
+							_0: _flarebyte$bubblegum_ui_builder$AnyModel$TraitsType,
+							_1: {
+								ctor: '::',
+								_0: _flarebyte$bubblegum_ui_builder$AnyModel$StylesType,
+								_1: {
+									ctor: '::',
+									_0: _flarebyte$bubblegum_ui_builder$AnyModel$PositionType,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$getSupportedFieldTypes = function (widgetType) {
+	var _p2 = widgetType;
+	switch (_p2.ctor) {
+		case 'CheckboxWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'IncSpinnerWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'MediumTextWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'BoundedListBoxWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'BoundedMultipleSelectWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'UnboundedListBoxWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'RangeSliderWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'DateViewerWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'LongTextWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'TextAreaWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'BoundedRadioWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'RowPanelWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		case 'BlockWidget':
+			return _flarebyte$bubblegum_ui_builder$AnyModel$basicFieldSupport;
+		default:
+			return _flarebyte$bubblegum_ui_builder$AnyModel$documentFieldSupport;
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$createAnyModel = F2(
+	function (id, widgetType) {
+		return {
+			id: id,
+			widgetType: widgetType,
+			fields: A2(
+				_elm_lang$core$List$map,
+				_flarebyte$bubblegum_ui_builder$AnyModel$createField,
+				_flarebyte$bubblegum_ui_builder$AnyModel$getSupportedFieldTypes(widgetType))
+		};
+	});
+var _flarebyte$bubblegum_ui_builder$AnyModel$NumberText = {ctor: 'NumberText'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$TagSet = {ctor: 'TagSet'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$EnumText = {ctor: 'EnumText'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$MultilineText = {ctor: 'MultilineText'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$LabelText = {ctor: 'LabelText'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo = function (fieldType) {
+	var _p3 = fieldType;
+	switch (_p3.ctor) {
+		case 'HelpInvalidType':
+			return {
+				label: 'Help Invalid',
+				hint: 'Help Invalid',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'HelpValidType':
+			return {
+				label: 'Help Valid',
+				hint: 'Help Valid',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'HintType':
+			return {
+				label: 'Hint',
+				hint: 'Practical information that could be helpful',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'IconsType':
+			return {
+				label: 'Icons',
+				hint: 'A list of icons to display',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'LabelType':
+			return {
+				label: 'Label',
+				hint: 'The main caption for the field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'LanguageSyntaxType':
+			return {
+				label: 'Language syntax',
+				hint: 'The format supported by the field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'MaxItemsType':
+			return {
+				label: 'Maximum number of items',
+				hint: 'The maximum number of items for this entity',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$NumberText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'MaxLengthType':
+			return {
+				label: 'Maximum length',
+				hint: 'The maximum number of characters for this field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$NumberText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'MaxLinesType':
+			return {
+				label: 'Maximum number of lines',
+				hint: 'The maximum number of lines for this text area',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$NumberText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'MinItemsType':
+			return {
+				label: 'Minimum number of items',
+				hint: 'The minimum number of items for this entity',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$NumberText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'MinLinesType':
+			return {
+				label: 'Minimum number of lines',
+				hint: 'The minimum number of lines for this text area',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$NumberText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'RegularExprType':
+			return {
+				label: 'Regex',
+				hint: 'A regular expression for this field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'PositionType':
+			return {
+				label: 'Position',
+				hint: 'the position or rank of this field compared to other fields',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'PlaceholderType':
+			return {
+				label: 'Placeholder',
+				hint: 'A placeholder to be displayed inside a field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+		case 'StylesType':
+			return {
+				label: 'Styles',
+				hint: 'A list of css styles to be applied to the widget or field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$TagSet,
+				suggestions: {
+					ctor: '::',
+					_0: 'red',
+					_1: {
+						ctor: '::',
+						_0: 'blue',
+						_1: {
+							ctor: '::',
+							_0: 'pink',
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			};
+		case 'TraitsType':
+			return {
+				label: 'Traits',
+				hint: 'A list of unique traits for this field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$EnumText,
+				suggestions: {
+					ctor: '::',
+					_0: 'alpha',
+					_1: {
+						ctor: '::',
+						_0: 'beta',
+						_1: {
+							ctor: '::',
+							_0: 'delta',
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			};
+		default:
+			return {
+				label: 'Validator',
+				hint: 'A validation function to apply to the field',
+				infoType: _flarebyte$bubblegum_ui_builder$AnyModel$LabelText,
+				suggestions: {ctor: '[]'}
+			};
+	}
+};
+var _flarebyte$bubblegum_ui_builder$AnyModel$CurieText = {ctor: 'CurieText'};
+var _flarebyte$bubblegum_ui_builder$AnyModel$UrlText = {ctor: 'UrlText'};
+
+var _pdamoc$elm_hashids$Hashids$ordOfIdx = F2(
+	function (i, str) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			0,
+			A2(
+				_elm_lang$core$Maybe$map,
+				_elm_lang$core$Char$toCode,
+				_elm_lang$core$List$head(
+					_elm_lang$core$String$toList(
+						A2(_elm_lang$core$String$dropLeft, i, str)))));
+	});
+var _pdamoc$elm_hashids$Hashids$strGet = F2(
+	function (i, str) {
+		return A2(
+			_elm_lang$core$String$left,
+			1,
+			A2(_elm_lang$core$String$dropLeft, i, str));
+	});
+var _pdamoc$elm_hashids$Hashids$splitOn = F2(
+	function (splitters, str) {
+		return A3(
+			_elm_lang$core$Regex$split,
+			_elm_lang$core$Regex$All,
+			_elm_lang$core$Regex$regex(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'[',
+					A2(_elm_lang$core$Basics_ops['++'], splitters, ']'))),
+			str);
+	});
+var _pdamoc$elm_hashids$Hashids$fromHex = function (hex) {
+	var toDig = function (n) {
+		var _p0 = _elm_lang$core$Char$toUpper(n);
+		switch (_p0.valueOf()) {
+			case '1':
+				return 1;
+			case '2':
+				return 2;
+			case '3':
+				return 3;
+			case '4':
+				return 4;
+			case '5':
+				return 5;
+			case '6':
+				return 6;
+			case '7':
+				return 7;
+			case '8':
+				return 8;
+			case '9':
+				return 9;
+			case 'A':
+				return 10;
+			case 'B':
+				return 11;
+			case 'C':
+				return 12;
+			case 'D':
+				return 13;
+			case 'E':
+				return 14;
+			case 'F':
+				return 15;
+			default:
+				return 0;
+		}
+	};
+	var go = F2(
+		function (current, _p1) {
+			var _p2 = _p1;
+			var _p3 = _p2._1;
+			return {
+				ctor: '_Tuple2',
+				_0: _p2._0 + (toDig(current) * Math.pow(16, _p3)),
+				_1: _p3 + 1
+			};
+		});
+	return _elm_lang$core$Tuple$first(
+		A3(
+			_elm_lang$core$String$foldr,
+			go,
+			{ctor: '_Tuple2', _0: 0, _1: 0},
+			hex));
+};
+var _pdamoc$elm_hashids$Hashids$chunksOf = F2(
+	function (size, str) {
+		var split = F2(
+			function (str, acc) {
+				split:
+				while (true) {
+					if (_elm_lang$core$Native_Utils.cmp(
+						_elm_lang$core$String$length(str),
+						size) > 0) {
+						var _v2 = A2(_elm_lang$core$String$dropRight, size, str),
+							_v3 = {
+							ctor: '::',
+							_0: A2(_elm_lang$core$String$right, size, str),
+							_1: acc
+						};
+						str = _v2;
+						acc = _v3;
+						continue split;
+					} else {
+						return {ctor: '::', _0: str, _1: acc};
+					}
+				}
+			});
+		return A2(
+			split,
+			str,
+			{ctor: '[]'});
+	});
+var _pdamoc$elm_hashids$Hashids$concatMap = function (f) {
+	return function (_p4) {
+		return _elm_lang$core$String$concat(
+			A2(_elm_lang$core$List$map, f, _p4));
+	};
+};
+var _pdamoc$elm_hashids$Hashids$defaultAlphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+var _pdamoc$elm_hashids$Hashids$forceGet = F2(
+	function (i, axs) {
+		var _p5 = A2(_elm_lang$core$Array$get, i, axs);
+		if (_p5.ctor === 'Nothing') {
+			return _elm_lang$core$Native_Utils.crashCase(
+				'Hashids',
+				{
+					start: {line: 103, column: 5},
+					end: {line: 108, column: 14}
+				},
+				_p5)(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'This should not happen',
+					_elm_lang$core$Basics$toString(i)));
+		} else {
+			return _p5._0;
+		}
+	});
+var _pdamoc$elm_hashids$Hashids$swap = F3(
+	function (i, j, str) {
+		var strArray = _elm_lang$core$Array$fromList(
+			_elm_lang$core$String$toList(str));
+		var iElem = A2(_pdamoc$elm_hashids$Hashids$forceGet, i, strArray);
+		var jElem = A2(_pdamoc$elm_hashids$Hashids$forceGet, j, strArray);
+		return _elm_lang$core$String$fromList(
+			_elm_lang$core$Array$toList(
+				A3(
+					_elm_lang$core$Array$set,
+					j,
+					iElem,
+					A3(_elm_lang$core$Array$set, i, jElem, strArray))));
+	});
+var _pdamoc$elm_hashids$Hashids$reorder = F2(
+	function (string, salt) {
+		var saltArray = _elm_lang$core$Array$fromList(
+			_elm_lang$core$String$toList(salt));
+		var alphaLen = _elm_lang$core$String$length(string);
+		var saltLen = _elm_lang$core$String$length(salt);
+		var shuffle = F4(
+			function (i, index, integerSum, str) {
+				shuffle:
+				while (true) {
+					if (_elm_lang$core$Native_Utils.cmp(i, 0) > 0) {
+						var newIndex = A2(_elm_lang$core$Basics_ops['%'], index, saltLen);
+						var integer = _elm_lang$core$Char$toCode(
+							A2(_pdamoc$elm_hashids$Hashids$forceGet, newIndex, saltArray));
+						var newIntegerSum = integerSum + integer;
+						var j = A2(_elm_lang$core$Basics_ops['%'], (integer + newIndex) + newIntegerSum, i);
+						var newStr = A3(_pdamoc$elm_hashids$Hashids$swap, i, j, str);
+						var _v5 = i - 1,
+							_v6 = newIndex + 1,
+							_v7 = newIntegerSum,
+							_v8 = newStr;
+						i = _v5;
+						index = _v6;
+						integerSum = _v7;
+						str = _v8;
+						continue shuffle;
+					} else {
+						return str;
+					}
+				}
+			});
+		return _elm_lang$core$Native_Utils.eq(saltLen, 0) ? string : A4(shuffle, alphaLen - 1, 0, 0, string);
+	});
+var _pdamoc$elm_hashids$Hashids$ensureLength = F5(
+	function (encoded, minHashLength, alphabet, guards, valuesHash) {
+		var splitAt = (_elm_lang$core$String$length(alphabet) / 2) | 0;
+		var extend = F2(
+			function (encoded, alpha) {
+				extend:
+				while (true) {
+					var alpha1 = A2(_pdamoc$elm_hashids$Hashids$reorder, alpha, alpha);
+					var encodedPre = A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(_elm_lang$core$String$dropLeft, splitAt, alpha1),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							encoded,
+							A2(_elm_lang$core$String$left, splitAt, alpha1)));
+					var excess = _elm_lang$core$String$length(encodedPre) - minHashLength;
+					var fromIndex = (excess / 2) | 0;
+					var encoded1 = (_elm_lang$core$Native_Utils.cmp(excess, 0) > 0) ? A2(
+						_elm_lang$core$String$left,
+						minHashLength,
+						A2(_elm_lang$core$String$dropLeft, fromIndex, encodedPre)) : encodedPre;
+					if (_elm_lang$core$Native_Utils.cmp(
+						_elm_lang$core$String$length(encoded1),
+						minHashLength) < 0) {
+						var _v9 = encoded1,
+							_v10 = alpha1;
+						encoded = _v9;
+						alpha = _v10;
+						continue extend;
+					} else {
+						return encoded1;
+					}
+				}
+			});
+		var guardsLen = _elm_lang$core$String$length(guards);
+		var guardIndex = A2(
+			_elm_lang$core$Basics_ops['%'],
+			valuesHash + A2(_pdamoc$elm_hashids$Hashids$ordOfIdx, 0, encoded),
+			guardsLen);
+		var acc = A2(
+			_elm_lang$core$Basics_ops['++'],
+			A2(_pdamoc$elm_hashids$Hashids$strGet, guardIndex, guards),
+			encoded);
+		var guardIndex1 = A2(
+			_elm_lang$core$Basics_ops['%'],
+			valuesHash + A2(_pdamoc$elm_hashids$Hashids$ordOfIdx, 2, acc),
+			guardsLen);
+		var acc1 = (_elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$String$length(acc),
+			minHashLength) < 0) ? A2(
+			_elm_lang$core$Basics_ops['++'],
+			acc,
+			A2(_pdamoc$elm_hashids$Hashids$strGet, guardIndex1, guards)) : acc;
+		return A2(extend, acc1, alphabet);
+	});
+var _pdamoc$elm_hashids$Hashids$encodeList = F2(
+	function (context, numbers) {
+		var hash = F3(
+			function (value, alpha, acc) {
+				hash:
+				while (true) {
+					var alphaLen = _elm_lang$core$String$length(alpha);
+					var value1 = (value / alphaLen) | 0;
+					var acc1 = A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(
+							_pdamoc$elm_hashids$Hashids$strGet,
+							A2(_elm_lang$core$Basics_ops['%'], value, alphaLen),
+							alpha),
+						acc);
+					if (_elm_lang$core$Native_Utils.eq(value1, 0)) {
+						return acc1;
+					} else {
+						var _v11 = value1,
+							_v12 = alpha,
+							_v13 = acc1;
+						value = _v11;
+						alpha = _v12;
+						acc = _v13;
+						continue hash;
+					}
+				}
+			});
+		var valuesHash = _elm_lang$core$List$sum(
+			A2(
+				_elm_lang$core$List$indexedMap,
+				F2(
+					function (i, n) {
+						return A2(_elm_lang$core$Basics_ops['%'], n, i + 100);
+					}),
+				numbers));
+		var _p7 = context;
+		var guards = _p7.guards;
+		var seps = _p7.seps;
+		var salt = _p7.salt;
+		var minHashLength = _p7.minHashLength;
+		var alphabet = _p7.alphabet;
+		var alphaLen = _elm_lang$core$String$length(alphabet);
+		var sepsLen = _elm_lang$core$String$length(seps);
+		var lottery = A2(
+			_pdamoc$elm_hashids$Hashids$strGet,
+			A2(_elm_lang$core$Basics_ops['%'], valuesHash, alphaLen),
+			alphabet);
+		var go = F2(
+			function (_p9, _p8) {
+				var _p10 = _p9;
+				var _p13 = _p10._1;
+				var _p11 = _p8;
+				var _p12 = _p11._1;
+				var alphaSalt = A2(
+					_elm_lang$core$String$left,
+					alphaLen,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						lottery,
+						A2(_elm_lang$core$Basics_ops['++'], salt, _p12)));
+				var alpha1 = A2(_pdamoc$elm_hashids$Hashids$reorder, _p12, alphaSalt);
+				var last = A3(hash, _p13, alpha1, '');
+				var firstCode = A2(_pdamoc$elm_hashids$Hashids$ordOfIdx, 0, last);
+				var value1 = A2(_elm_lang$core$Basics_ops['%'], _p13, firstCode + _p10._0);
+				var sepEnc = A2(
+					_pdamoc$elm_hashids$Hashids$strGet,
+					A2(_elm_lang$core$Basics_ops['%'], value1, sepsLen),
+					seps);
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Basics_ops['++'],
+						_p11._0,
+						{
+							ctor: '::',
+							_0: A2(_elm_lang$core$Basics_ops['++'], last, sepEnc),
+							_1: {ctor: '[]'}
+						}),
+					_1: alpha1
+				};
+			});
+		var _p14 = A3(
+			_elm_lang$core$List$foldl,
+			go,
+			{
+				ctor: '_Tuple2',
+				_0: {
+					ctor: '::',
+					_0: lottery,
+					_1: {ctor: '[]'}
+				},
+				_1: alphabet
+			},
+			A2(
+				_elm_lang$core$List$indexedMap,
+				F2(
+					function (v0, v1) {
+						return {ctor: '_Tuple2', _0: v0, _1: v1};
+					}),
+				numbers));
+		var encodedList = _p14._0;
+		var alpha1 = _p14._1;
+		var encodedPre = _elm_lang$core$String$concat(encodedList);
+		var encoded = A2(_elm_lang$core$String$dropRight, 1, encodedPre);
+		return (_elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$String$length(encoded),
+			minHashLength) > -1) ? encoded : A5(_pdamoc$elm_hashids$Hashids$ensureLength, encoded, minHashLength, alpha1, guards, valuesHash);
+	});
+var _pdamoc$elm_hashids$Hashids$encodeHex = F2(
+	function (context, str) {
+		var go = function (str) {
+			return _pdamoc$elm_hashids$Hashids$fromHex(
+				A2(_elm_lang$core$Basics_ops['++'], '1', str));
+		};
+		return A2(_elm_lang$core$String$all, _elm_lang$core$Char$isHexDigit, str) ? A2(
+			_pdamoc$elm_hashids$Hashids$encodeList,
+			context,
+			A2(
+				_elm_lang$core$List$map,
+				go,
+				A2(_pdamoc$elm_hashids$Hashids$chunksOf, 12, str))) : '';
+	});
+var _pdamoc$elm_hashids$Hashids$decode = F2(
+	function (context, hash) {
+		if (_elm_lang$core$Native_Utils.eq(hash, '')) {
+			return {ctor: '[]'};
+		} else {
+			var unhash = F2(
+				function (part, alpha) {
+					var position = function (c) {
+						return function (_p15) {
+							return A2(
+								_elm_lang$core$Maybe$withDefault,
+								0,
+								_elm_lang$core$List$head(_p15));
+						}(
+							A2(_elm_lang$core$String$indexes, c, alpha));
+					};
+					var partList = A2(
+						_elm_lang$core$List$map,
+						_elm_lang$core$String$fromChar,
+						_elm_lang$core$String$toList(part));
+					var alphaLen = _elm_lang$core$String$length(alpha);
+					var partLen = _elm_lang$core$String$length(part);
+					var go = F2(
+						function (i, c) {
+							return position(c) * Math.pow(alphaLen, (partLen - i) - 1);
+						});
+					return _elm_lang$core$List$sum(
+						A2(_elm_lang$core$List$indexedMap, go, partList));
+				});
+			var _p16 = context;
+			var guards = _p16.guards;
+			var seps = _p16.seps;
+			var salt = _p16.salt;
+			var minHashLength = _p16.minHashLength;
+			var alphabet = _p16.alphabet;
+			var guardParts = A2(_pdamoc$elm_hashids$Hashids$splitOn, guards, hash);
+			var guardPartsLen = _elm_lang$core$List$length(guardParts);
+			var hash1 = A2(
+				_elm_lang$core$Maybe$withDefault,
+				'',
+				_elm_lang$core$List$head(
+					((_elm_lang$core$Native_Utils.cmp(2, guardPartsLen) < 1) && (_elm_lang$core$Native_Utils.cmp(guardPartsLen, 3) < 1)) ? A2(_elm_lang$core$List$drop, 1, guardParts) : guardParts));
+			var hash2 = A2(_elm_lang$core$String$dropLeft, 1, hash1);
+			var lotteryChar = A2(_elm_lang$core$String$left, 1, hash1);
+			var hashParts = A2(_pdamoc$elm_hashids$Hashids$splitOn, seps, hash2);
+			var go = F2(
+				function (part, _p17) {
+					var _p18 = _p17;
+					var _p19 = _p18._1;
+					var alphaSalt = A2(
+						_elm_lang$core$String$left,
+						_elm_lang$core$String$length(_p19),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							lotteryChar,
+							A2(_elm_lang$core$Basics_ops['++'], salt, _p19)));
+					var alpha1 = A2(_pdamoc$elm_hashids$Hashids$reorder, _p19, alphaSalt);
+					return {
+						ctor: '_Tuple2',
+						_0: A2(
+							_elm_lang$core$Basics_ops['++'],
+							_p18._0,
+							{
+								ctor: '::',
+								_0: A2(unhash, part, alpha1),
+								_1: {ctor: '[]'}
+							}),
+						_1: alpha1
+					};
+				});
+			var numbers = _elm_lang$core$String$isEmpty(hash1) ? {ctor: '[]'} : _elm_lang$core$Tuple$first(
+				A3(
+					_elm_lang$core$List$foldl,
+					go,
+					{
+						ctor: '_Tuple2',
+						_0: {ctor: '[]'},
+						_1: alphabet
+					},
+					hashParts));
+			return (!_elm_lang$core$Native_Utils.eq(
+				A2(_pdamoc$elm_hashids$Hashids$encodeList, context, numbers),
+				hash)) ? {ctor: '[]'} : numbers;
+		}
+	});
+var _pdamoc$elm_hashids$Hashids$decodeHex = F2(
+	function (context, hash) {
+		var numbers = A2(_pdamoc$elm_hashids$Hashids$decode, context, hash);
+		return A2(
+			_pdamoc$elm_hashids$Hashids$concatMap,
+			function (n) {
+				return A2(
+					_elm_lang$core$String$dropLeft,
+					1,
+					_elm_lang$core$Basics$toString(n));
+			},
+			numbers);
+	});
+var _pdamoc$elm_hashids$Hashids$encode = F2(
+	function (context, n) {
+		return A2(
+			_pdamoc$elm_hashids$Hashids$encodeList,
+			context,
+			{
+				ctor: '::',
+				_0: n,
+				_1: {ctor: '[]'}
+			});
+	});
+var _pdamoc$elm_hashids$Hashids$containsChar = function (_p20) {
+	return _elm_lang$core$String$contains(
+		_elm_lang$core$String$fromChar(_p20));
+};
+var _pdamoc$elm_hashids$Hashids$unique = function (str) {
+	var addIfNotMember = F2(
+		function (c, xs) {
+			return A2(_pdamoc$elm_hashids$Hashids$containsChar, c, xs) ? xs : A2(_elm_lang$core$String$cons, c, xs);
+		});
+	return A3(_elm_lang$core$String$foldr, addIfNotMember, '', str);
+};
+var _pdamoc$elm_hashids$Hashids$intersect = F2(
+	function (first, second) {
+		var member = function (c) {
+			return A2(_pdamoc$elm_hashids$Hashids$containsChar, c, second);
+		};
+		return A2(_elm_lang$core$String$filter, member, first);
+	});
+var _pdamoc$elm_hashids$Hashids$exclude = F2(
+	function (toBeExcluded, from) {
+		var member = function (c) {
+			return !A2(_pdamoc$elm_hashids$Hashids$containsChar, c, toBeExcluded);
+		};
+		return A2(_elm_lang$core$String$filter, member, from);
+	});
+var _pdamoc$elm_hashids$Hashids$createHashidsContext = F3(
+	function (salt, minHashLen, alphabet) {
+		var guardDiv = 12;
+		var withGuard = function (_p21) {
+			var _p22 = _p21;
+			var _p24 = _p22._0;
+			var _p23 = _p22._1;
+			var lenAlpha = _elm_lang$core$String$length(_p23);
+			var numGuards = _elm_lang$core$Basics$ceiling(
+				_elm_lang$core$Basics$toFloat(lenAlpha) / guardDiv);
+			var alpha1 = A2(_pdamoc$elm_hashids$Hashids$reorder, _p23, salt);
+			return (_elm_lang$core$Native_Utils.cmp(lenAlpha, 3) < 0) ? {
+				ctor: '_Tuple3',
+				_0: A2(_elm_lang$core$String$dropLeft, numGuards, _p24),
+				_1: alpha1,
+				_2: A2(_elm_lang$core$String$left, numGuards, _p24)
+			} : {
+				ctor: '_Tuple3',
+				_0: _p24,
+				_1: A2(_elm_lang$core$String$dropLeft, numGuards, alpha1),
+				_2: A2(_elm_lang$core$String$left, numGuards, alpha1)
+			};
+		};
+		var sepDiv = 3.5;
+		var validSeps = function (_p25) {
+			var _p26 = _p25;
+			var _p27 = _p26._1;
+			var lenAlpha = _elm_lang$core$String$length(_p27);
+			var minSeps = _elm_lang$core$Basics$ceiling(
+				_elm_lang$core$Basics$toFloat(lenAlpha) / sepDiv);
+			var seps1 = A2(_pdamoc$elm_hashids$Hashids$reorder, _p26._0, salt);
+			var lenSeps = _elm_lang$core$String$length(seps1);
+			if (_elm_lang$core$Native_Utils.cmp(lenSeps, minSeps) < 0) {
+				var minSeps1 = _elm_lang$core$Native_Utils.eq(minSeps, 1) ? 2 : minSeps;
+				if (_elm_lang$core$Native_Utils.cmp(minSeps1, lenSeps) > 0) {
+					var splitAt = minSeps1 - lenSeps;
+					var seps2 = A2(
+						_elm_lang$core$Basics_ops['++'],
+						seps1,
+						A2(_elm_lang$core$String$left, splitAt, _p27));
+					var alpha1 = A2(_elm_lang$core$String$dropLeft, splitAt, _p27);
+					return {ctor: '_Tuple2', _0: seps2, _1: alpha1};
+				} else {
+					return {ctor: '_Tuple2', _0: seps1, _1: _p27};
+				}
+			} else {
+				return {ctor: '_Tuple2', _0: seps1, _1: _p27};
+			}
+		};
+		var minAlphabetLength = 16;
+		var clean = function (alpha) {
+			var hasSpaces = A2(_elm_lang$core$String$contains, ' ', alpha);
+			var seps = 'cfhistuCFHISTU';
+			var seps1 = A2(_pdamoc$elm_hashids$Hashids$intersect, seps, alpha);
+			var alpha1 = A2(
+				_pdamoc$elm_hashids$Hashids$exclude,
+				seps1,
+				_pdamoc$elm_hashids$Hashids$unique(alpha));
+			var alphabetIsSmall = _elm_lang$core$Native_Utils.cmp(
+				_elm_lang$core$String$length(
+					A2(_elm_lang$core$Basics_ops['++'], alpha1, seps1)),
+				minAlphabetLength) < 0;
+			var _p28 = {ctor: '_Tuple2', _0: hasSpaces, _1: alphabetIsSmall};
+			if (_p28._0 === true) {
+				return A2(
+					_elm_lang$core$Debug$log,
+					'alphabet provided has spaces, using default',
+					{
+						ctor: '_Tuple2',
+						_0: seps,
+						_1: A2(_pdamoc$elm_hashids$Hashids$exclude, seps, _pdamoc$elm_hashids$Hashids$defaultAlphabet)
+					});
+			} else {
+				if (_p28._1 === true) {
+					return A2(
+						_elm_lang$core$Debug$log,
+						'alphabet too small, using default',
+						{
+							ctor: '_Tuple2',
+							_0: seps,
+							_1: A2(_pdamoc$elm_hashids$Hashids$exclude, seps, _pdamoc$elm_hashids$Hashids$defaultAlphabet)
+						});
+				} else {
+					return {ctor: '_Tuple2', _0: seps1, _1: alpha1};
+				}
+			}
+		};
+		var _p29 = withGuard(
+			validSeps(
+				clean(alphabet)));
+		var seps1 = _p29._0;
+		var alphabet1 = _p29._1;
+		var guards = _p29._2;
+		return {guards: guards, seps: seps1, salt: salt, minHashLength: minHashLen, alphabet: alphabet1};
+	});
+var _pdamoc$elm_hashids$Hashids$hashidsSimple = function (salt) {
+	return A3(_pdamoc$elm_hashids$Hashids$createHashidsContext, salt, 0, _pdamoc$elm_hashids$Hashids$defaultAlphabet);
+};
+var _pdamoc$elm_hashids$Hashids$encodeUsingSalt = function (_p30) {
+	return _pdamoc$elm_hashids$Hashids$encode(
+		_pdamoc$elm_hashids$Hashids$hashidsSimple(_p30));
+};
+var _pdamoc$elm_hashids$Hashids$encodeListUsingSalt = function (_p31) {
+	return _pdamoc$elm_hashids$Hashids$encodeList(
+		_pdamoc$elm_hashids$Hashids$hashidsSimple(_p31));
+};
+var _pdamoc$elm_hashids$Hashids$decodeUsingSalt = function (_p32) {
+	return _pdamoc$elm_hashids$Hashids$decode(
+		_pdamoc$elm_hashids$Hashids$hashidsSimple(_p32));
+};
+var _pdamoc$elm_hashids$Hashids$encodeHexUsingSalt = function (_p33) {
+	return _pdamoc$elm_hashids$Hashids$encodeHex(
+		_pdamoc$elm_hashids$Hashids$hashidsSimple(_p33));
+};
+var _pdamoc$elm_hashids$Hashids$decodeHexUsingSalt = function (_p34) {
+	return _pdamoc$elm_hashids$Hashids$decodeHex(
+		_pdamoc$elm_hashids$Hashids$hashidsSimple(_p34));
+};
+var _pdamoc$elm_hashids$Hashids$hashidsMinimum = F2(
+	function (salt, minimum) {
+		return A3(_pdamoc$elm_hashids$Hashids$createHashidsContext, salt, minimum, _pdamoc$elm_hashids$Hashids$defaultAlphabet);
+	});
+var _pdamoc$elm_hashids$Hashids$Context = F5(
+	function (a, b, c, d, e) {
+		return {guards: a, seps: b, salt: c, minHashLength: d, alphabet: e};
+	});
+
+var _flarebyte$bubblegum_ui_builder$IdGenerator$hashids = _pdamoc$elm_hashids$Hashids$hashidsSimple('4kThCaqnggqdRjw3d1s1');
+var _flarebyte$bubblegum_ui_builder$IdGenerator$create = F2(
+	function (widgetType, counter) {
+		return A2(
+			_elm_lang$core$String$join,
+			'-',
+			{
+				ctor: '::',
+				_0: _flarebyte$bubblegum_ui_builder$AnyModel$getIdPrefix(widgetType),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_pdamoc$elm_hashids$Hashids$encodeList,
+						_flarebyte$bubblegum_ui_builder$IdGenerator$hashids,
+						{
+							ctor: '::',
+							_0: counter,
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+
+var _flarebyte$bubblegum_ui_builder$AppModel$removeChildrenLink = F2(
+	function (parentNode, nodeId) {
+		return _elm_lang$core$Native_Utils.update(
+			parentNode,
+			{
+				children: A2(
+					_elm_lang$core$List$filter,
+					function (edge) {
+						return !_elm_lang$core$Native_Utils.eq(edge.id, nodeId);
+					},
+					parentNode.children)
+			});
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$unlinkNode = F3(
+	function (appModel, parentId, nodeId) {
+		return _elm_lang$core$Native_Utils.update(
+			appModel,
+			{
+				nodes: A3(
+					_elm_lang$core$Dict$update,
+					parentId,
+					_elm_lang$core$Maybe$map(
+						function (p) {
+							return A2(_flarebyte$bubblegum_ui_builder$AppModel$removeChildrenLink, p, nodeId);
+						}),
+					appModel.nodes)
+			});
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$deletedNodeLinks = F2(
+	function (nodeId, nodes) {
+		return _elm_lang$core$Dict$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				function (duo) {
+					return A2(
+						_elm_lang$core$Tuple$mapSecond,
+						function (pn) {
+							return A2(_flarebyte$bubblegum_ui_builder$AppModel$removeChildrenLink, pn, nodeId);
+						},
+						duo);
+				},
+				_elm_lang$core$Dict$toList(nodes)));
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$deleteNode = F2(
+	function (appModel, nodeId) {
+		return _elm_lang$core$Native_Utils.update(
+			appModel,
+			{
+				nodes: A2(
+					_flarebyte$bubblegum_ui_builder$AppModel$deletedNodeLinks,
+					nodeId,
+					A2(_elm_lang$core$Dict$remove, nodeId, appModel.nodes))
+			});
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$linkNode = F3(
+	function (appModel, parentId, nodeId) {
+		var widgetType = A2(
+			_elm_lang$core$Maybe$withDefault,
+			_flarebyte$bubblegum_ui_builder$AnyModel$DocumentWidget,
+			A2(
+				_elm_lang$core$Maybe$map,
+				function (_) {
+					return _.widgetType;
+				},
+				A2(
+					_elm_lang$core$Maybe$map,
+					function (_) {
+						return _.node;
+					},
+					A2(_elm_lang$core$Dict$get, nodeId, appModel.nodes))));
+		var childEdge = A2(_flarebyte$bubblegum_ui_builder$AnyModel$createAnyModel, nodeId, widgetType);
+		var newNodes = A3(
+			_elm_lang$core$Dict$update,
+			parentId,
+			_elm_lang$core$Maybe$map(
+				function (p) {
+					return _elm_lang$core$Native_Utils.update(
+						p,
+						{
+							children: {ctor: '::', _0: childEdge, _1: p.children}
+						});
+				}),
+			appModel.nodes);
+		return _elm_lang$core$Native_Utils.update(
+			appModel,
+			{nodes: newNodes});
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$addNode = F3(
+	function (appModel, parentId, widgetType) {
+		var counter = appModel.counter + 1;
+		var newId = A2(_flarebyte$bubblegum_ui_builder$IdGenerator$create, widgetType, counter);
+		var newNode = {
+			node: A2(_flarebyte$bubblegum_ui_builder$AnyModel$createAnyModel, newId, widgetType),
+			children: {ctor: '[]'}
+		};
+		var childEdge = A2(_flarebyte$bubblegum_ui_builder$AnyModel$createAnyModel, newId, widgetType);
+		var newNodes = A3(
+			_elm_lang$core$Dict$update,
+			parentId,
+			_elm_lang$core$Maybe$map(
+				function (p) {
+					return _elm_lang$core$Native_Utils.update(
+						p,
+						{
+							children: {ctor: '::', _0: childEdge, _1: p.children}
+						});
+				}),
+			A3(_elm_lang$core$Dict$insert, newId, newNode, appModel.nodes));
+		return {counter: counter, nodes: newNodes, crumbs: appModel.crumbs};
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$getNode = F2(
+	function (appModel, nodeId) {
+		return A2(_elm_lang$core$Dict$get, nodeId, appModel.nodes);
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$rootNode = {
+	node: A2(_flarebyte$bubblegum_ui_builder$AnyModel$createAnyModel, 'root', _flarebyte$bubblegum_ui_builder$AnyModel$DocumentWidget),
+	children: {ctor: '[]'}
+};
+var _flarebyte$bubblegum_ui_builder$AppModel$reset = {
+	counter: 1,
+	nodes: _elm_lang$core$Dict$fromList(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'root', _1: _flarebyte$bubblegum_ui_builder$AppModel$rootNode},
+			_1: {ctor: '[]'}
+		}),
+	crumbs: {ctor: '[]'}
+};
+var _flarebyte$bubblegum_ui_builder$AppModel$ParentNode = F2(
+	function (a, b) {
+		return {node: a, children: b};
+	});
+var _flarebyte$bubblegum_ui_builder$AppModel$AppModel = F3(
+	function (a, b, c) {
+		return {counter: a, nodes: b, crumbs: c};
+	});
+
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createTagsField = function (fieldType) {
+	var fieldInfo = _flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo(fieldType);
+	var options = A2(
+		_elm_lang$core$List$map,
+		function (opt) {
+			return A2(
+				_elm_lang$html$Html$option,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(opt),
+					_1: {ctor: '[]'}
+				});
+		},
+		fieldInfo.suggestions);
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('field'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$label,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('label'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(fieldInfo.label),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('control'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('select'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$select,
+											{ctor: '[]'},
+											options),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$p,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('help'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(fieldInfo.hint),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('tags has-addons'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$span,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('tag is-danger'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Alex Smith'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('tag is-delete'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createDropdownField = function (fieldType) {
+	var fieldInfo = _flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo(fieldType);
+	var options = A2(
+		_elm_lang$core$List$map,
+		function (opt) {
+			return A2(
+				_elm_lang$html$Html$option,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(opt),
+					_1: {ctor: '[]'}
+				});
+		},
+		fieldInfo.suggestions);
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('field'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$label,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('label'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(fieldInfo.label),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('control'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('select'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$select,
+									{ctor: '[]'},
+									options),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('help'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(fieldInfo.hint),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createNumberField = function (fieldType) {
+	var fieldInfo = _flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo(fieldType);
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('field'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$label,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('label'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(fieldInfo.label),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('control'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('input'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('number'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$min('0'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$max('10000'),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('help'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(fieldInfo.hint),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createLabelField = function (fieldType) {
+	var fieldInfo = _flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo(fieldType);
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('field'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$label,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('label'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(fieldInfo.label),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('control'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('input'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('text'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$maxlength(40),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('help'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(fieldInfo.hint),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createField = function (fieldType) {
+	var infoType = function (_) {
+		return _.infoType;
+	}(
+		_flarebyte$bubblegum_ui_builder$AnyModel$getFieldInfo(fieldType));
+	var _p0 = infoType;
+	switch (_p0.ctor) {
+		case 'NumberText':
+			return _flarebyte$bubblegum_ui_builder$FormBuilder$createNumberField(fieldType);
+		case 'EnumText':
+			return _flarebyte$bubblegum_ui_builder$FormBuilder$createDropdownField(fieldType);
+		case 'TagSet':
+			return _flarebyte$bubblegum_ui_builder$FormBuilder$createTagsField(fieldType);
+		default:
+			return _flarebyte$bubblegum_ui_builder$FormBuilder$createLabelField(fieldType);
+	}
+};
+var _flarebyte$bubblegum_ui_builder$FormBuilder$createWidgetForm = function (widgetType) {
+	var supportedFields = _flarebyte$bubblegum_ui_builder$AnyModel$getSupportedFieldTypes(widgetType);
+	var fields = A2(_elm_lang$core$List$map, _flarebyte$bubblegum_ui_builder$FormBuilder$createField, supportedFields);
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		fields);
+};
+
 var _flarebyte$bubblegum_ui_builder$App$viewValidation = function (model) {
 	var _p0 = _elm_lang$core$Native_Utils.eq(model.password, model.passwordAgain) ? {ctor: '_Tuple2', _0: 'green', _1: 'OK'} : {ctor: '_Tuple2', _0: 'red', _1: 'Passwords do not match!'};
 	var color = _p0._0;
@@ -8280,6 +11325,65 @@ var _flarebyte$bubblegum_ui_builder$App$viewValidation = function (model) {
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(message),
 			_1: {ctor: '[]'}
+		});
+};
+var _flarebyte$bubblegum_ui_builder$App$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$section,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('section'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _flarebyte$bubblegum_ui_builder$About$appHeader,
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('columns'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('column'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _flarebyte$bubblegum_ui_builder$About$appSearch,
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('column'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _flarebyte$bubblegum_ui_builder$FormBuilder$createWidgetForm(_flarebyte$bubblegum_ui_builder$AnyModel$MediumTextWidget),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: _flarebyte$bubblegum_ui_builder$About$appFooter,
+					_1: {ctor: '[]'}
+				}
+			}
 		});
 };
 var _flarebyte$bubblegum_ui_builder$App$update = F2(
@@ -8305,6 +11409,8 @@ var _flarebyte$bubblegum_ui_builder$App$Model = F3(
 		return {name: a, password: b, passwordAgain: c};
 	});
 var _flarebyte$bubblegum_ui_builder$App$model = A3(_flarebyte$bubblegum_ui_builder$App$Model, '', '', '');
+var _flarebyte$bubblegum_ui_builder$App$main = _elm_lang$html$Html$beginnerProgram(
+	{model: _flarebyte$bubblegum_ui_builder$App$model, view: _flarebyte$bubblegum_ui_builder$App$view, update: _flarebyte$bubblegum_ui_builder$App$update})();
 var _flarebyte$bubblegum_ui_builder$App$PasswordAgain = function (a) {
 	return {ctor: 'PasswordAgain', _0: a};
 };
@@ -8314,75 +11420,6 @@ var _flarebyte$bubblegum_ui_builder$App$Password = function (a) {
 var _flarebyte$bubblegum_ui_builder$App$Name = function (a) {
 	return {ctor: 'Name', _0: a};
 };
-var _flarebyte$bubblegum_ui_builder$App$view = function (model) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$input,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$type_('text'),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$placeholder('Name'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onInput(_flarebyte$bubblegum_ui_builder$App$Name),
-							_1: {ctor: '[]'}
-						}
-					}
-				},
-				{ctor: '[]'}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$input,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$type_('password'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$placeholder('Password'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onInput(_flarebyte$bubblegum_ui_builder$App$Password),
-								_1: {ctor: '[]'}
-							}
-						}
-					},
-					{ctor: '[]'}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$input,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$type_('password'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$placeholder('Re-enter Password'),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onInput(_flarebyte$bubblegum_ui_builder$App$PasswordAgain),
-									_1: {ctor: '[]'}
-								}
-							}
-						},
-						{ctor: '[]'}),
-					_1: {
-						ctor: '::',
-						_0: _flarebyte$bubblegum_ui_builder$App$viewValidation(model),
-						_1: {ctor: '[]'}
-					}
-				}
-			}
-		});
-};
-var _flarebyte$bubblegum_ui_builder$App$main = _elm_lang$html$Html$beginnerProgram(
-	{model: _flarebyte$bubblegum_ui_builder$App$model, view: _flarebyte$bubblegum_ui_builder$App$view, update: _flarebyte$bubblegum_ui_builder$App$update})();
 
 var Elm = {};
 Elm['App'] = Elm['App'] || {};

@@ -6,12 +6,14 @@ module App
 @docs
 
 -}
--- Read all about this program in the official Elm guide:
--- https://guide.elm-lang.org/architecture/user_input/forms.html
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import About as About
+import AppModel exposing (..)
+import FormBuilder
+import AnyModel exposing (WidgetType(..))
 
 
 main =
@@ -67,11 +69,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ input [ type_ "text", placeholder "Name", onInput Name ] []
-    , input [ type_ "password", placeholder "Password", onInput Password ] []
-    , input [ type_ "password", placeholder "Re-enter Password", onInput PasswordAgain ] []
-    , viewValidation model
+  section [ class "section" ]
+    [ 
+      About.appHeader
+      , div [ class "columns" ]
+        [ div [ class "column" ]
+          [About.appSearch]
+        , div [ class "column" ]
+          [FormBuilder.createWidgetForm MediumTextWidget]
+        ]
+      , About.appFooter
     ]
 
 
